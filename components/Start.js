@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, ImageBackground, KeyboardAvoidingView, Platform  } from 'react-native';
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -7,61 +7,64 @@ const Start = ({ navigation }) => {
   const colors = ['#707d8f', '#6d8c92', '#5370ac', '#31ceaa'];
 
   return (
-    <View style={styles.container}>
-        <ImageBackground source={require('../img/BackgroundImage.png')} style={styles.bgImage} resizeMode="cover">
-            <Text style={styles.appTitle}>Welcome!</Text>
-            <View style={styles.box}>
-                <TextInput
-                    style={styles.textInput}
-                    value={name}
-                    onChangeText={setName}
-                    placeholder='Type in your username here.'
-                />
-                <Text style={styles.chooseBackgroundColor}>Choose Background Color</Text>
-                <View style={styles.colorButtonsBox}>
-                    {colors.map((color, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={[styles.colorButton, { backgroundColor: color}, background === color && styles.selected]}
-                            onPress={() => setBackground(color)}
-                        />
-                    ))}
-                </View>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Chat', { name: name, background: background })}>
-                    <Text style={styles.buttonText}>Start Chat</Text>
-                </TouchableOpacity>
-            </View>
-        </ImageBackground>
-    </View>
+    <ImageBackground source={require('../img/BackgroundImage.png')} style={styles.bgImage} resizeMode="cover">
+      <Text style={styles.appTitle}>Welcome!</Text>
+        <View style={styles.box}>
+          <TextInput
+              accessibilityLabel="Username input"
+              accessibilityRole="text"
+              style={styles.textInput}
+              value={name}
+              onChangeText={setName}
+              placeholder='Type in your username here'
+          />
+          <Text style={styles.chooseBackgroundColor}>Choose Background Color</Text>
+          <View style={styles.colorButtonsBox}>
+            {colors.map((color, index) => (
+              <TouchableOpacity
+                  accessibilityLabel="Color Button"
+                  accessibilityHint="Let's choose a background color for your chat."
+                  accessibilityRole="button"
+                  key={index}
+                  style={[styles.colorButton, { backgroundColor: color }, background === color && styles.selected]}
+                  onPress={() => setBackground(color)}
+              />
+            ))}
+          </View>
+            <TouchableOpacity
+              accessibilityLabel="Start Chatting"
+              accessibilityRole="button"
+              style={styles.button}
+              onPress={() => navigation.navigate('Chat', { name: name, background: background })}>
+              <Text style={styles.buttonText}>Start Chatting</Text>
+            </TouchableOpacity>
+          </View>
+        {Platform.OS === "ios" ? <KeyboardAvoidingView behavior="padding" /> : null}
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-     justifyContent: 'center',
-    alignItems: 'center'
-  },
   bgImage: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
-    height: '100%',
+    justifyContent: 'center'
   },
   appTitle: {
     fontSize: 45,
     fontWeight: '600',
     color: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
     margin: 20
   },
   box: {
     backgroundColor: '#ffffff',
-    padding: 30,
     width: '88%',
     height: '44%',
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 30,
+    justifyContent: 'space-evenly',
   },
   textInput: {
     width: "88%",
@@ -74,32 +77,38 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '300',
-    color: '#8B7974',
+    color: '#444444',
+    marginTop: 10,
   },
   colorButtonsBox: {
     flexDirection: 'row',
+    width: '75%',
     justifyContent: 'space-between',
-    margin: 20
+    top: 5,
+    bottom: 5,
   },
   colorButton: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    margin: 5
+    margin: 10,
   },
   selected: {
     borderColor: 'black',
-    borderWidth: 1
+    borderWidth: 3
   },
   button: {
     alignItems: 'center',
     backgroundColor: '#8B7974',
-    padding: 10,
+    padding: 15,
+    margin: 45,
+    alignItems: 'center',
+    width: '88%'
   },
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#ffffff'
+    color: '#ffffff',
   },
 });
 
