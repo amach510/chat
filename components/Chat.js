@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, KeyboardAvoidingView, Platform} from 'react-native';
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
-import { collection, addDoc, onSnapshot, orderBy, query } from "firebase/firestore";
 
-const Chat = ({ route, navigation, db }) => {
-  const { name, background, userID } = route.params;
+const Chat = ({ route, navigation }) => {
+  const { name, background } = route.params;
   const [messages, setMessages] = useState([]);
   const onSend = (newMessages) => {
-    addDoc(collection(db, "messages"), newMessages[0])
+    setMessages(previousMessages => GiftedChat.append(previousMessages, newMessages))
   }
 
   const renderBubble = (props) => {
@@ -29,23 +28,24 @@ const Chat = ({ route, navigation, db }) => {
   }, []);
 
   useEffect(() => {
-    const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-    const unsubMessages = onSnapshot(q, (documentSnapshot) => {
-        let newMessages = [];
-        documentSnapshot.forEach(doc => {
-          newMessages.push({ 
-            id: doc.id, 
-            ...doc.data(),
-            createdAt: new Date(doc.data().createdAt.toMillis())
-          })
-        });
-        setMessages(newMessages);
-    });
-
-    // Clean up code
-    return () => {
-      if (unsubMessages) unsubMessages();
-    }
+    setMessages([
+      {
+        _id: 1,
+        text: 'Hello developer',
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+          name: 'React Native',
+          avatar: 'https://placeimg.com/140/140/any',
+        },
+      },
+      {
+        _id: 2,
+        text: 'This is a system message',
+        createdAt: new Date(),
+        system: true,
+      },
+    ]);
   }, []);
 
  return (
@@ -55,9 +55,7 @@ const Chat = ({ route, navigation, db }) => {
       renderBubble={renderBubble}
       onSend={messages => onSend(messages)}
       user={{
-        //_id: route.params.id,
-        _id: userID,
-        name
+        _id: 1
       }}
     />
     { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
