@@ -30,7 +30,7 @@ const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, id }) => 
         );
     };
 
-    // Get Location
+    // Get location
     const getLocation = async () => {
         let permissions = await Location.requestForegroundPermissionsAsync();
         if (permissions?.granted) {
@@ -51,6 +51,38 @@ const CustomActions = ({ wrapperStyle, iconTextStyle, onSend, storage, id }) => 
         const timeStamp = (new Date()).getTime();
         const imageName = uri.split("/")[uri.split("/").length - 1];
         return `${id}-${timeStamp}-${imageName}`;
+    }
+
+    // Upload and send image
+    const uploadAndSendImage = async (imageURI) => {
+        const uniqueRefString = generateReference(imageURI); 
+        const newUploadRef = ref(storage, uniqueRefString);
+        const response = await fetch(imageURI);
+        const blob = await response.blob();
+        uploadBytes(newUploadRef, blob).then(async (snapshot) => {
+            const imageURL = await getDownloadURL(snapshot.ref);
+            onSend({ image: imageURL});
+        });
+    }
+
+    // Pick an image
+    const pickImage = async () => {
+        let permissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (permissions?.granted) {
+            let result = await ImagePicker.launchImageLibraryAsync();
+            if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);                
+            else Alert.alert("Permissions to accsess photo library haven't been granted.");
+        }
+    }
+
+    // Take a photo
+    const takePhoto = async () => {
+        let permissions = await ImagePicker.requestCameraPermissionsAsync();
+        if (permissions?.granted) {
+            let result = await ImagePicker.launchCameraAsync();
+            if (!result.canceled) await uploadAndSendImage(result.assets[0].uri);
+            else Alert.alert("Permissions to use camera haven't been granted.")
+        }
     }
 
     return (
